@@ -1,6 +1,6 @@
 """Synthetic stand-ins: toy FMC forward library and noisy measurements."""
 
-from .forward_toy import C_L_STEEL, linear_array_positions, toneburst, toy_fmc_library
+from .forward_toy import C_L_STEEL, linear_array_positions, toneburst, toy_fmc_library, toy_fmc_truth
 from .measurement import (
     SyntheticMeasurement,
     add_measurement_noise,
@@ -19,4 +19,5 @@ __all__ = [
     "noise_sigma",
     "toneburst",
     "toy_fmc_library",
+    "toy_fmc_truth",
 ]

@@ -63,16 +63,18 @@ def toy_fmc_library(
     tip_amplitude: float = 0.3,
     corner_amplitude: float = 1.0,
     include_backwall: bool = False,
+    time: np.ndarray | None = None,
 ) -> ForwardLibrary:
     """Build a toy FMC forward library with ``dims = ("crack", "tx", "rx", "time")``.
 
     Defaults describe a 64-element, 5 MHz, 0.6 mm pitch (~lambda/2 in steel) linear
     array on a 20 mm steel plate with a backwall-breaking crack under the array
     centre. ``fs = 25 MHz`` (5x the centre frequency) keeps the 64x64 FMC small;
-    the time window is gated to cover the earliest tip and latest corner arrivals.
+    the time window is gated to cover the earliest tip and latest corner arrivals
+    unless an explicit ``time`` vector [s] is given.
 
-    Crack sizes are in metres; a single off-grid ``crack_sizes=[a_true]`` call
-    gives a "true" response that is not one of the library entries.
+    Crack sizes are in metres. Use :func:`toy_fmc_truth` for an off-grid "true"
+    response on the same time base as an existing library.
     """
     a = np.atleast_1d(check_positive(crack_sizes, "crack_sizes"))
     if np.any(a >= thickness):
@@ -97,7 +99,11 @@ def toy_fmc_library(
     t1 = 2 * r_max.max() / c + 2 * half_pulse
     if include_backwall:
         t1 = max(t1, 2 * np.hypot(0.5 * (xe[-1] - xe[0]), thickness) / c + 2 * half_pulse)
-    time = t0 + np.arange(int(np.ceil((t1 - t0) * fs))) / fs
+    if time is None:
+        time = t0 + np.arange(int(np.ceil((t1 - t0) * fs))) / fs
+    else:
+        time = np.asarray(time, dtype=float)
+        fs = 1.0 / float(np.median(np.diff(time)))
 
     def scatterer(z: float, amp: float) -> np.ndarray:
         r, cos_t = legs(z)
@@ -130,6 +136,24 @@ def toy_fmc_library(
         metadata={
             "n_elements": n_elements, "pitch_m": pitch, "f_c_Hz": f_c, "n_cycles": n_cycles,
             "c_m_per_s": c, "thickness_m": thickness, "crack_x_m": crack_x,
-            "include_backwall": include_backwall,
+            "include_backwall": include_backwall, "tip_amplitude": tip_amplitude,
+            "corner_amplitude": corner_amplitude,
         },
     )
+
+
+def toy_fmc_truth(a_true: float, library: ForwardLibrary) -> np.ndarray:
+    """Clean toy response at an arbitrary (off-grid) ``a_true`` [m], on ``library``'s time base.
+
+    ``library`` must come from :func:`toy_fmc_library`; its stored parameters are reused.
+    """
+    if library.source != "toy_fmc_library":
+        raise ValueError("toy_fmc_truth needs a library built by toy_fmc_library.")
+    m = library.metadata
+    one = toy_fmc_library(
+        [a_true], n_elements=m["n_elements"], pitch=m["pitch_m"], f_c=m["f_c_Hz"], n_cycles=m["n_cycles"],
+        c=m["c_m_per_s"], thickness=m["thickness_m"], crack_x=m["crack_x_m"],
+        include_backwall=m["include_backwall"], time=library.time,
+        tip_amplitude=m["tip_amplitude"], corner_amplitude=m["corner_amplitude"],
+    )
+    return one.responses[0]

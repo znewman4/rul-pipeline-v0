@@ -101,7 +101,7 @@ class ForwardLibrary:
 
 def validate_forward_library(lib: ForwardLibrary) -> None:
     """Check internal consistency of a :class:`ForwardLibrary`; raise ``ValueError``."""
-    a = check_increasing_grid(lib.crack_sizes, "crack_sizes")
+    a = check_increasing_grid(lib.crack_sizes, "crack_sizes", min_points=1)
     if np.any(a <= 0):
         raise ValueError("crack_sizes must be strictly positive (metres).")
     if a.max() > 0.5:

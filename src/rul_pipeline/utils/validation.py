@@ -38,13 +38,13 @@ def check_nonnegative(x: ArrayLike, name: str) -> np.ndarray:
     return arr
 
 
-def check_increasing_grid(x: ArrayLike, name: str) -> np.ndarray:
+def check_increasing_grid(x: ArrayLike, name: str, *, min_points: int = 2) -> np.ndarray:
     """Return ``x`` as a 1-D finite float array that is strictly increasing."""
     arr = check_finite(x, name)
     if arr.ndim != 1:
         raise ValueError(f"{name} must be 1-D; got shape {arr.shape}.")
-    if arr.size < 2:
-        raise ValueError(f"{name} must contain at least 2 points; got {arr.size}.")
+    if arr.size < min_points:
+        raise ValueError(f"{name} must contain at least {min_points} point(s); got {arr.size}.")
     if np.any(np.diff(arr) <= 0):
         raise ValueError(f"{name} must be strictly increasing (sorted, no duplicates).")
     return arr
