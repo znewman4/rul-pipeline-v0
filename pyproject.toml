@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rul-pipeline"
+version = "0.1.0"
+description = "Version 0 probabilistic chain: ultrasonic NDT (BristolFE) -> crack-size posterior -> Paris-law remaining useful life -> inspection interval."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "matplotlib>=3.7",
+    "h5py>=3.8",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+notebook = ["jupyter", "nbformat"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

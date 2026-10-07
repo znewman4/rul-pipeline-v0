@@ -1,0 +1,3 @@
+# Data files are not version-controlled; keep this directory.
+*
+!.gitignore

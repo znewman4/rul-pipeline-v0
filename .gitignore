@@ -1,4 +1,13 @@
-﻿__pycache__/
+__pycache__/
 *.pyc
 .venv/
-data/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Generated figures from scripts/run_v0.py
+outputs/
+
+# Data files are ignored by per-directory .gitignore files in data/*/
