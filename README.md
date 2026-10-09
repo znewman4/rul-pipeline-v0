@@ -1,7 +1,7 @@
 # rul-pipeline-v0
 
 **Probabilistic ultrasonic NDT → crack-size posterior → remaining useful life → next inspection.**
-This is the Python side of a PhD pipeline. Forward ultrasonic responses come from MATLAB / [BristolFE](https://github.com/ndtatbristol/BristolFE-v2); Python handles inversion, uncertainty propagation, crack growth, prognosis and (later) sequential Bayesian updating.
+This is the Python side of a PhD pipeline. Forward ultrasonic responses come from MATLAB / [BristolFE](https://github.com/ndtatbristol/BristolFE-v3); Python handles inversion, uncertainty propagation, crack growth, prognosis and (later) sequential Bayesian updating.
 
 ## Version 0 objective
 
