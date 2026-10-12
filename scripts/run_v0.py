@@ -114,9 +114,19 @@ def main() -> None:
     post = invert_grid(y, lib, sigma)
     print(f"[4-5] {post.summary()}")
 
-    # 6. Posterior samples (jittered within grid cells) ---------------------------------
-    a_samples = sample_posterior(post, args.n_samples, rng=rng, jitter=True)
-    print(f"[6] Drew {a_samples.size} samples a^(i) ~ p(a | y); sample mean {a_samples.mean() / MM:.4g} mm")
+    # 6. Posterior samples (discrete: grid values exactly, no jitter) -------------------------
+    a_all = sample_posterior(post, args.n_samples, rng=rng, jitter=False)
+    notch = lib.notch_only_index
+    p_notch = float(post.posterior[notch]) if notch is not None else 0.0
+    a_samples = a_all[a_all > 0]      # notch-only (a = 0) is not a crack: it never enters Paris growth
+    print(f"[6] Drew {a_all.size} discrete samples a^(i) ~ p(a | y); sample mean {a_all.mean() / MM:.4g} mm")
+    if notch is not None:
+        print(f"    P(notch only | y) = {p_notch:.4g} (kept separate; Paris/RUL below are conditional on a > 0, "
+              f"{a_samples.size} samples)")
+        if a_samples.size == 0:
+            print("    Posterior is entirely notch-only: no crack to propagate, stopping before Paris/RUL.")
+            args.outdir.mkdir(parents=True, exist_ok=True)
+            return
 
     # 7. Structural map K_I ----------------------------------------------------------------
     model = ParisModel(delta_sigma=args.delta_sigma_mpa * 1e6, Y=args.Y)

@@ -63,7 +63,7 @@ def test_wrong_crack_axis_gives_hint():
     "overrides, message",
     [
         ({"crack_sizes": A[::-1].copy()}, "strictly increasing"),
-        ({"crack_sizes": np.array([0.0, 1e-3, 2e-3])}, "strictly positive"),
+        ({"crack_sizes": np.array([-1e-3, 1e-3, 2e-3])}, "non-negative"),
         ({"dims": ("crack", "tx", "time")}, "Name every axis"),
         ({"dims": ("tx", "crack", "rx", "time")}, "dims\\[0\\] must be 'crack'"),
         ({"time": np.arange(9) / 25e6}, "time has 9 samples"),
@@ -171,3 +171,9 @@ def test_bandlimited_noise_is_in_band_and_has_requested_sigma():
     power = np.mean(np.abs(np.fft.rfft(y, axis=-1)) ** 2, axis=0)
     f = np.fft.rfftfreq(512, 1 / fs)
     assert abs(f[np.argmax(power)] - f_c) < 0.5e6
+
+
+def test_notch_only_zero_crack_size_is_supported():
+    lib = _lib(crack_sizes=np.array([0.0, 1e-3, 2e-3]))
+    assert lib.notch_only_index == 0
+    assert _lib().notch_only_index is None

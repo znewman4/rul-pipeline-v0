@@ -1,5 +1,6 @@
 """Bayesian inversion y -> p(a | y)."""
 
+from .error_models import LikelihoodResult, gaussian_loglik, total_variance
 from .grid_bayes import (
     GridPosterior,
     discrete_quantile,
@@ -12,6 +13,9 @@ from .grid_bayes import (
 )
 
 __all__ = [
+    "LikelihoodResult",
+    "gaussian_loglik",
+    "total_variance",
     "GridPosterior",
     "discrete_quantile",
     "estimate_sigma_profile",

@@ -85,6 +85,16 @@ class ForwardLibrary:
         return int(self.crack_sizes.size)
 
     @property
+    def notch_only_index(self) -> int | None:
+        """Index of the notch-only entry (crack size exactly 0), or ``None``.
+
+        The notch-only case is a legitimate hypothesis for the inversion, but it is
+        not a crack and must not be fed to Paris-law growth; keep its posterior
+        mass separate (see ``scripts/run_v0.py``).
+        """
+        return 0 if self.crack_sizes[0] == 0 else None
+
+    @property
     def measurement_shape(self) -> tuple[int, ...]:
         """Shape of a single response F(a_i) (everything after the crack axis)."""
         return tuple(self.responses.shape[1:])
@@ -102,8 +112,8 @@ class ForwardLibrary:
 def validate_forward_library(lib: ForwardLibrary) -> None:
     """Check internal consistency of a :class:`ForwardLibrary`; raise ``ValueError``."""
     a = check_increasing_grid(lib.crack_sizes, "crack_sizes", min_points=1)
-    if np.any(a <= 0):
-        raise ValueError("crack_sizes must be strictly positive (metres).")
+    if np.any(a < 0):
+        raise ValueError("crack_sizes must be non-negative (metres); 0 is the notch-only case.")
     if a.max() > 0.5:
         warnings.warn(
             f"Largest crack size is {a.max():.3g} m. crack_sizes are expected in metres; "

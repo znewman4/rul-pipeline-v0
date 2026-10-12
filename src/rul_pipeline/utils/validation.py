@@ -74,4 +74,8 @@ def normalise_log_weights(log_w: ArrayLike) -> tuple[np.ndarray, float]:
     log_z = float(logsumexp(log_w))
     if not np.isfinite(log_z):
         raise ValueError("All log-weights are -inf: the distribution has zero total mass.")
-    return np.exp(log_w - log_z), log_z
+    # Shift by the max before exponentiating: log_w and log_z are both ~ -1e6 for FMC data, so
+    # their difference would otherwise carry ~1e-10 absolute rounding error.
+    shifted = log_w - np.max(log_w)
+    w = np.exp(shifted)
+    return w / w.sum(), log_z

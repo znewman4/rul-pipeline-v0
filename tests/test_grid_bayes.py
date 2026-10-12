@@ -120,3 +120,13 @@ def test_profile_sigma_recovers_noise_level(lib):
     truth = lib.responses[15]
     y, s = add_measurement_noise(truth, sigma=0.2, rng=np.random.default_rng(2))
     assert estimate_sigma_profile(y, lib) == pytest.approx(0.2, rel=0.02)
+
+
+def test_notch_only_mass_is_separable_and_discrete_sampling_keeps_zero():
+    sizes = np.array([0.0, 1e-3, 2e-3])
+    lib0 = ForwardLibrary(crack_sizes=sizes, responses=np.array([[0.0, 0.0], [1.0, 1.0], [2.0, 2.0]]),
+                          dims=("crack", "feature"))
+    post = invert_grid(np.array([0.0, 0.0]), lib0, sigma=0.3)
+    assert post.map == 0.0 and post.posterior[lib0.notch_only_index] > 0.99
+    s = sample_posterior(post, 1000, rng=np.random.default_rng(0))
+    assert set(np.unique(s)) <= set(sizes) and np.mean(s == 0.0) > 0.95
